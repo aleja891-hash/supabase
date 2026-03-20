@@ -14,7 +14,7 @@ services:
     image: supabase/studio:2026.03.16-sha-5528817
     restart: unless-stopped
     networks:
-      default:
+     - default
     healthcheck:
       test:
         [
@@ -405,7 +405,7 @@ services:
     image: supabase/postgres-meta:v0.95.2
     restart: unless-stopped
     networks:
-      default:
+     - default
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
@@ -503,8 +503,8 @@ services:
     image: supabase/postgres:15.8.1.085
     restart: unless-stopped
     networks:
-      default:
-      dokploy-network:
+     - default
+     - dokploy-network
     volumes:
       - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
       # Must be superuser to create event trigger
