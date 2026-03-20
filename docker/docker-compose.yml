@@ -13,20 +13,17 @@ services:
     container_name: supabase-studio
     image: supabase/studio:2026.03.16-sha-5528817
     restart: unless-stopped
-    networks:
-     - default
     healthcheck:
       test:
         [
           "CMD",
           "node",
           "-e",
-          "fetch('http://localhost:3000/api/platform/profile').then((r) => {if (r.status !== 200) throw new Error(r.status)})"
+          "fetch('http://studio:3000/api/platform/profile').then((r) => {if (r.status !== 200) throw new Error(r.status)})"
         ]
       timeout: 10s
-      interval: 10s
-      retries: 5
-      start_period: 60s
+      interval: 5s
+      retries: 3
     depends_on:
       analytics:
         condition: service_healthy
@@ -122,8 +119,6 @@ services:
     container_name: supabase-auth
     image: supabase/gotrue:v2.186.0
     restart: unless-stopped
-    networks:
-      - default
     healthcheck:
       test:
         [
@@ -251,8 +246,6 @@ services:
     container_name: supabase-rest
     image: postgrest/postgrest:v14.6
     restart: unless-stopped
-    networks:
-      - default
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
@@ -278,8 +271,6 @@ services:
     container_name: realtime-dev.supabase-realtime
     image: supabase/realtime:v2.76.5
     restart: unless-stopped
-    networks:
-      - default
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
@@ -325,8 +316,6 @@ services:
     container_name: supabase-storage
     image: supabase/storage-api:v1.44.2
     restart: unless-stopped
-    networks:
-      - default
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
@@ -389,8 +378,6 @@ services:
     container_name: supabase-imgproxy
     image: darthsim/imgproxy:v3.30.1
     restart: unless-stopped
-    networks:
-      - default
     volumes:
       - ./volumes/storage:/var/lib/storage:z
     healthcheck:
@@ -414,8 +401,6 @@ services:
     container_name: supabase-meta
     image: supabase/postgres-meta:v0.95.2
     restart: unless-stopped
-    networks:
-      - default
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
@@ -433,8 +418,6 @@ services:
     container_name: supabase-edge-functions
     image: supabase/edge-runtime:v1.71.2
     restart: unless-stopped
-    networks:
-      - default
     volumes:
       - ./volumes/functions:/home/deno/functions:Z
       - deno-cache:/root/.cache/deno
@@ -466,8 +449,6 @@ services:
     container_name: supabase-analytics
     image: supabase/logflare:1.31.2
     restart: unless-stopped
-    networks:
-      - default
     # ports:
     #   - 4000:4000
     # Uncomment to use Big Query backend for analytics
@@ -486,7 +467,6 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
-      start_period: 60s
     depends_on:
       db:
         # Disable this if you are using an external Postgres database
@@ -517,9 +497,6 @@ services:
     container_name: supabase-db
     image: supabase/postgres:15.8.1.085
     restart: unless-stopped
-    networks:
-     - default
-     - dokploy-network
     volumes:
       - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
       # Must be superuser to create event trigger
@@ -569,12 +546,11 @@ services:
         "-c",
         "log_min_messages=fatal" # prevents Realtime polling queries from appearing in logs
       ]
+
   vector:
     container_name: supabase-vector
     image: timberio/vector:0.53.0-alpine
     restart: unless-stopped
-    networks:
-      - default
     volumes:
       - ./volumes/logs/vector.yml:/etc/vector/vector.yml:ro,z
       - ${DOCKER_SOCKET_LOCATION}:/var/run/docker.sock:ro,z
@@ -606,8 +582,6 @@ services:
     container_name: supabase-pooler
     image: supabase/supavisor:2.7.4
     restart: unless-stopped
-    networks:
-      - default
     ports:
       - ${POSTGRES_PORT}:5432
       - ${POOLER_PROXY_PORT_TRANSACTION}:6543
@@ -659,8 +633,3 @@ services:
 volumes:
   db-config:
   deno-cache:
-networks:
-  default:
-    driver: bridge
-  dokploy-network:
-    external: true
