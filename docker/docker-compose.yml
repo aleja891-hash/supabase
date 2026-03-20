@@ -606,6 +606,8 @@ services:
     container_name: supabase-pooler
     image: supabase/supavisor:2.7.4
     restart: unless-stopped
+    networks:
+      - default
     ports:
       - ${POSTGRES_PORT}:5432
       - ${POOLER_PROXY_PORT_TRANSACTION}:6543
