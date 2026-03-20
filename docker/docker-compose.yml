@@ -22,8 +22,9 @@ services:
           "fetch('http://studio:3000/api/platform/profile').then((r) => {if (r.status !== 200) throw new Error(r.status)})"
         ]
       timeout: 10s
-      interval: 5s
-      retries: 3
+      interval: 10s
+      retries: 5
+      start_period: 60s
     depends_on:
       analytics:
         condition: service_healthy
@@ -546,7 +547,9 @@ services:
         "-c",
         "log_min_messages=fatal" # prevents Realtime polling queries from appearing in logs
       ]
-
+    networks:
+      - default
+      - dokploy-network
   vector:
     container_name: supabase-vector
     image: timberio/vector:0.53.0-alpine
@@ -633,3 +636,8 @@ services:
 volumes:
   db-config:
   deno-cache:
+networks:
+  default:
+    driver: bridge
+  dokploy-network:
+    external: true
